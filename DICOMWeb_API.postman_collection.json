@@ -1,0 +1,343 @@
+{
+  "info": {
+    "_postman_id": "dicomweb-api-collection",
+    "name": "DICOMWeb API - Colección Completa",
+    "description": "Colección de Postman para probar la API DICOMWeb (STOW-RS, WADO-RS, QIDO-RS)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001",
+      "type": "string"
+    },
+    {
+      "key": "studyUID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "seriesUID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "instanceUID",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. General",
+      "item": [
+        {
+          "name": "Info del Servidor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            },
+            "description": "Obtiene información general del servidor y endpoints disponibles"
+          }
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Verifica que el servidor esté funcionando"
+          }
+        },
+        {
+          "name": "Estadísticas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dicomweb/statistics",
+              "host": ["{{baseUrl}}"],
+              "path": ["dicomweb", "statistics"]
+            },
+            "description": "Obtiene estadísticas del sistema (total de estudios, series, instancias, espacio usado)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. STOW-RS (Store - Guardar)",
+      "item": [
+        {
+          "name": "Guardar Imágenes DICOM",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Guardar UIDs en variables para usar en otros requests",
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.results && jsonData.results.length > 0) {",
+                  "        pm.collectionVariables.set('studyUID', jsonData.results[0].studyInstanceUID);",
+                  "        pm.collectionVariables.set('seriesUID', jsonData.results[0].seriesInstanceUID);",
+                  "        pm.collectionVariables.set('instanceUID', jsonData.results[0].sopInstanceUID);",
+                  "        console.log('UIDs guardados:', jsonData.results[0]);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": [],
+                  "description": "Selecciona uno o más archivos DICOM (.dcm)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/dicomweb/studies",
+              "host": ["{{baseUrl}}"],
+              "path": ["dicomweb", "studies"]
+            },
+            "description": "Sube archivos DICOM al servidor. Selecciona archivos .dcm en el campo 'files'.\n\nIMPORTANTE: Haz clic en 'Select Files' y elige uno o más archivos DICOM de tu computadora."
+          }
+        },
+        {
+          "name": "Guardar en Estudio Específico",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": [],
+                  "description": "Archivos DICOM que pertenecen al estudio especificado"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/dicomweb/studies/{{studyUID}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["dicomweb", "studies", "{{studyUID}}"]
+            },
+            "description": "Sube archivos DICOM a un estudio específico. El Study UID del archivo debe coincidir con el de la URL."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. QIDO-RS (Query - Buscar)",
+      "item": [
+        {
+          "name": "Buscar Todos los Estudios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dicomweb/studies",
+              "host": ["{{baseUrl}}"],
+              "path": ["dicomweb", "studies"]
+            },
+            "description": "Obtiene todos los estudios almacenados en el sistema"
+          }
+        },
+        {
+          "name": "Buscar Estudios por Paciente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dicomweb/studies?PatientName=John",
+              "host": ["{{baseUrl}}"],
+              "path": ["dicomweb", "studies"],
+              "query": [
+                {
+                  "key": "PatientName",
+                  "value": "John",
+                  "description": "Nombre del paciente (búsqueda parcial)"
+                }
+              ]
+            },
+            "description": "Busca estudios por nombre de paciente"
+          }
+        },
+        {
+          "name": "Buscar Estudios por Patient ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dicomweb/studies?PatientID=12345",
+              "host": ["{{baseUrl}}"],
+              "path": ["dicomweb", "studies"],
+              "query": [
+                {
+                  "key": "PatientID",
+                  "value": "12345",
+                  "description": "ID del paciente"
+                }
+              ]
+            },
+            "description": "Busca estudios por ID de paciente"
+          }
+        },
+        {
+          "name": "Buscar Estudios por Fecha",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dicomweb/studies?StudyDate=20240101",
+              "host": ["{{baseUrl}}"],
+              "path": ["dicomweb", "studies"],
+              "query": [
+                {
+                  "key": "StudyDate",
+                  "value": "20240101",
+                  "description": "Fecha del estudio (formato YYYYMMDD)"
+                }
+              ]
+            },
+            "description": "Busca estudios por fecha"
+          }
+        },
+        {
+          "name": "Buscar Series de un Estudio",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dicomweb/studies/{{studyUID}}/series",
+              "host": ["{{baseUrl}}"],
+              "path": ["dicomweb", "studies", "{{studyUID}}", "series"]
+            },
+            "description": "Obtiene todas las series de un estudio específico"
+          }
+        },
+        {
+          "name": "Buscar Series por Modalidad",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dicomweb/studies/{{studyUID}}/series?Modality=CT",
+              "host": ["{{baseUrl}}"],
+              "path": ["dicomweb", "studies", "{{studyUID}}", "series"],
+              "query": [
+                {
+                  "key": "Modality",
+                  "value": "CT",
+                  "description": "Modalidad: CT, MR, US, XA, etc."
+                }
+              ]
+            },
+            "description": "Busca series de un estudio por modalidad"
+          }
+        },
+        {
+          "name": "Buscar Instancias de una Serie",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dicomweb/studies/{{studyUID}}/series/{{seriesUID}}/instances",
+              "host": ["{{baseUrl}}"],
+              "path": ["dicomweb", "studies", "{{studyUID}}", "series", "{{seriesUID}}", "instances"]
+            },
+            "description": "Obtiene todas las instancias de una serie específica"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. WADO-RS (Retrieve - Recuperar)",
+      "item": [
+        {
+          "name": "Recuperar Estudio Completo (Metadatos)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dicomweb/studies/{{studyUID}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["dicomweb", "studies", "{{studyUID}}"]
+            },
+            "description": "Recupera todos los metadatos de un estudio (study, series, instances)"
+          }
+        },
+        {
+          "name": "Recuperar Serie (Metadatos)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dicomweb/studies/{{studyUID}}/series/{{seriesUID}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["dicomweb", "studies", "{{studyUID}}", "series", "{{seriesUID}}"]
+            },
+            "description": "Recupera los metadatos de una serie específica"
+          }
+        },
+        {
+          "name": "Descargar Archivo DICOM (Instancia)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dicomweb/studies/{{studyUID}}/series/{{seriesUID}}/instances/{{instanceUID}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["dicomweb", "studies", "{{studyUID}}", "series", "{{seriesUID}}", "instances", "{{instanceUID}}"]
+            },
+            "description": "Descarga el archivo DICOM completo de una instancia. Usa 'Send and Download' para guardar el archivo."
+          }
+        },
+        {
+          "name": "Recuperar Metadatos de Instancia (JSON)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dicomweb/studies/{{studyUID}}/series/{{seriesUID}}/instances/{{instanceUID}}/metadata",
+              "host": ["{{baseUrl}}"],
+              "path": ["dicomweb", "studies", "{{studyUID}}", "series", "{{seriesUID}}", "instances", "{{instanceUID}}", "metadata"]
+            },
+            "description": "Recupera solo los metadatos de una instancia en formato JSON (DICOMWeb JSON Model)"
+          }
+        },
+        {
+          "name": "Descargar DICOM Directo (por Instance UID)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dicomweb/instances/{{instanceUID}}/file",
+              "host": ["{{baseUrl}}"],
+              "path": ["dicomweb", "instances", "{{instanceUID}}", "file"]
+            },
+            "description": "Descarga un archivo DICOM directamente usando solo el SOP Instance UID (ruta simplificada)"
+          }
+        }
+      ]
+    }
+  ]
+}
