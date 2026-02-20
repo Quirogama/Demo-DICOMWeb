@@ -83,17 +83,17 @@ app.use((err, req, res, next) => {
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log('='.repeat(50));
-  console.log('🏥 Servidor DICOMWeb API iniciado');
+  console.log('Servidor DICOMWeb API iniciado');
   console.log('='.repeat(50));
-  console.log(`📡 Puerto: ${PORT}`);
-  console.log(`🔗 URL: http://localhost:${PORT}`);
-  console.log(`📚 Documentación: http://localhost:${PORT}/`);
-  console.log(`✅ Health Check: http://localhost:${PORT}/health`);
+  console.log(`Puerto: ${PORT}`);
+  console.log(`URL: http://localhost:${PORT}`);
+  console.log(`Documentación: http://localhost:${PORT}/`);
+  console.log(`Health Check: http://localhost:${PORT}/health`);
   console.log('='.repeat(50));
   console.log('Endpoints disponibles:');
-  console.log('  STOW-RS: POST /dicomweb/studies');
-  console.log('  WADO-RS: GET /dicomweb/studies/{studyUID}');
-  console.log('  QIDO-RS: GET /dicomweb/studies');
+  console.log('STOW-RS: POST /dicomweb/studies');
+  console.log('WADO-RS: GET /dicomweb/studies/{studyUID}');
+  console.log('QIDO-RS: GET /dicomweb/studies');
   console.log('='.repeat(50));
 });
 

@@ -12,7 +12,7 @@ const db = new sqlite3.Database(path.join(dbDir, 'dicomweb.db'), (err) => {
   if (err) {
     console.error('Error al crear base de datos:', err);
   } else {
-    console.log('✅ Base de datos SQLite conectada');
+    console.log('Base de datos SQLite conectada');
   }
 });
 
